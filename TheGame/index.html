@@ -17,8 +17,8 @@
         var Q = Quintus()
             .include("Sprites, Scenes, Input, 2D, Anim, Touch, UI")
             .setup({
-                width: 960,
-                height: 640,
+                width: 855,
+                height: 480,
                 development: true
             }).controls().touch();            
         
@@ -55,22 +55,6 @@
                 this._super(p, { asset: "coin.png" });
             }
         });
-
-        //player
-        //Q.Sprite.extend("Player",{
-        //    init: function(p) {
-        //        this._super(p, { asset: "player.png", x: 110, y: 50, jumpSpeed: -380 });
-        //        this.add('2d, platformerControls');              
-        //    },
-        //    step: function(dt) {
-        //        if(Q.inputs['left'] && this.p.direction == 'right') {
-        //            this.p.flip = 'x';
-        //        } 
-        //        if(Q.inputs['right']  && this.p.direction == 'left') {
-        //            this.p.flip = false;                    
-        //        }
-        //    }                    
-        //});
 
         Q.animations('player', {
             run_left: { frames: [1, 2, 3], next: 'stand_left', rate: 1 / 5 },
@@ -119,10 +103,26 @@
 
         });
                        
-        //Q.scene("level1", function (stage) {
-        //    Q.stageTMX("level1.tmx", stage);
-        //    stage.add("viewport").follow(Q("Player").first());
-        //});
+        Q.Sprite.extend("vCoin", {
+            init: function (p) {
+                this._super(p, { vy: -100, rangeY: 200, gravity: 0 });
+                this.add("2d");
+
+                this.p.initialY = this.p.y;
+
+                this.on("bump.left,bump.right,bump.bottom", function(collision){
+                    if (collision.obj.isA("Player")) {
+                        this.destroy();
+                    }
+                })
+            },
+            step: function (dt) {
+                if (this.p.y - this.p.initialY >= this.p.rangeY && this.p.vy > 0)
+                    this.p.vy = -this.p.vy;
+                else if (-this.p.y + this.p.initialY >= this.p.rangeY && this.p.vy < 0)
+                    this.p.vy = -this.p.vy;
+            }
+        });
 
         Q.scene("level1",function(stage) {
           
@@ -133,22 +133,17 @@
           
             var player = stage.insert(new Q.Player());
             
+            stage.insert(new Q.vCoin({x: 1050, y:350, rangeY:200, asset:"coin.png"}));
             stage.add("viewport").follow(player,{x: true, y: true},{minX: 0, maxX: background.p.w, minY: 0, maxY: background.p.h});
           
         });
                 
         //load assets
-        Q.load("tiles_map.png, player.png, level1.tmx", function() {
+        Q.load("tiles_map.png, player.png, level1.tmx, coin.png", function() {
             Q.sheet("tiles", "tiles_map.png", { tilew: 70, tileh: 70 });
             Q.sheet("player", "player.png", { "tilew": 130, "tileh": 230, "sx": 0, "sy": 0 });
             Q.stageScene("level1");
-        });
-
-        //Q.loadTMX("tiles_map.png, player.png, level1.tmx", function () {
-        //    Q.sheet("tiles", "tiles_map.png", { tilew: 70, tileh: 70 });
-        //    Q.stageScene("level1");
-            //});
-                    
+        });                    
         
         </script>
     </body>
