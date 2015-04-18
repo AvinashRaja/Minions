@@ -55,7 +55,6 @@
         });
 
         var SPRITE_BOX = 1;
-
         Q.gravityY = 2000;
 
         Q.Sprite.extend("Player", {
@@ -73,7 +72,6 @@
                 });
 
                 //this.p.points = [[0, 0], [20, 0], [20, 20], [0, 20]]; //Giving player points of collision
-
                 this.add("2d, animation");  // Add components
             },
             step: function (dt) {
@@ -87,7 +85,7 @@
                     this.p.landed = 0;
                 }
 
-                if (Q.inputs['up'] && this.p.landed > 0) {
+                if ((Q.inputs['up'] || Q.inputs['fire']) && this.p.landed > 0) {
                     this.p.vy = this.p.jump;
                 }
 
@@ -99,7 +97,70 @@
 
                 this.stage.viewport.centerOn(this.p.x + 350, 400);
             }
+        });
 
+        Q.Sprite.extend("Box", {
+            init: function () {
+                var levels = [565, 540, 500, 450];
+
+                var player = Q("Player").first();
+                this._super({
+                    x: player.p.x + Q.width + 50,
+                    y: levels[Math.floor(Math.random() * 3)],
+                    frame: Math.random() < 0.5 ? 1 : 0,
+                    scale: 2,
+                    type: SPRITE_BOX,
+                    sheet: "coin",        // Spritesheet
+                    sprite: "coin",       // Animationsheet
+                    vx: -600 + 200 * Math.random(),
+                    vy: 0,
+                    ay: 0,
+                    theta: (300 * Math.random() + 200) * (Math.random() < 0.5 ? 1 : -1)
+                });
+                this.add("animation");
+                this.on("hit");
+            },
+            step: function (dt) {
+                this.play("rotate");
+                this.p.x += this.p.vx * dt;
+
+                this.p.vy += this.p.ay * dt;
+                this.p.y += this.p.vy * dt;
+                if (this.p.y != 565) {
+                    this.p.angle += this.p.theta * dt;
+                }
+
+                if (this.p.y > 800) { this.destroy(); }
+            },
+            hit: function () {
+                this.p.type = 0;
+                this.p.collisionMask = Q.SPRITE_NONE;
+                this.p.vx = 200;
+                this.p.ay = 400;
+                this.p.vy = -300;
+                this.p.opacity = 0.5;
+            }
+        });
+
+        Q.GameObject.extend("BoxThrower", {
+            init: function () {
+                this.p = {
+                    launchDelay: 0.75,
+                    launchRandom: 1,
+                    launch: 2
+                }
+            },
+            update: function (dt) {
+                this.p.launch -= dt;
+
+                if (this.p.launch < 0) {
+                    this.stage.insert(new Q.Box());
+                    this.p.launch = this.p.launchDelay + this.p.launchRandom * Math.random();
+                }
+            },
+            render: function () {
+
+            }
         });
 
         Q.scene("level1", function (stage) {
@@ -107,20 +168,24 @@
             stage.insert(new Q.Repeater({ asset: "background-mount.png", repeatY: false, speedX: 0.2, y: 190 }));
             stage.insert(new Q.Repeater({ asset: "background-floor.png", repeatY: false, speedX: 0.4, y: 320, type: SPRITE_BOX }));
 
-            //stage.insert(new Q.BoxThrower());
+            stage.insert(new Q.BoxThrower());
 
             stage.insert(new Q.Player());
-            stage.add("viewport");//.follow(player, { x: true, y: true }, { minX: 0, maxX: background.p.w, minY: 0, maxY: background.p.h });
+            stage.add("viewport");
         });
 
-        Q.load("player.png, background-sky.png, background-mount.png, background-floor.png, coin.png", function () {
+        Q.load("player.png, background-sky.png, background-mount.png, background-floor.png, coins.png", function () {
             Q.sheet("player", "player.png", { "tilew": 130, "tileh": 230, "sx": 0, "sy": 0 });
+            Q.sheet("coin", "coins.png", { "tilew": 42, "tileh": 46 });
             Q.animations("player", {
                 walk_left: { frames: [0, 1, 2, 3], next: 'stand_left', rate: 1 / 5 },
                 walk_right: { frames: [0, 1, 2, 3], next: 'stand_right', rate: 1 / 5 },
                 stand_left: { frames: [0] },
                 stand_right: { frames: [0] },
                 jump: { frames: [2], loop: false, rate: 1 },
+            });
+            Q.animations("coin", {
+                rotate: { frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], rate: 1 },
             });
             Q.stageScene("level1");
         });                 
