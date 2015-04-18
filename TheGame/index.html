@@ -74,7 +74,11 @@
                     jumpSpeed: -580,
                     scale: 0.4,             // scale sprite to right size
                     flip: "",
+                    //standingPoints: [[-6, 20], [-13, 15], [-13, -28], [23, -28], [23, 15], [16, 20]],
+                    //duckingPoints: [[-16, 44], [-23, 35], [-23, -10], [23, -10], [23, 35], [16, 44]],
                 });
+
+                this.p.points = [[0, 0], [20, 0], [20, 20], [0, 20]]; //Giving player points of collision
 
                 this.add("2d, platformerControls, animation");  // Add components
                 this.on("hit.sprite", function (collision) {
@@ -124,6 +128,29 @@
             }
         });
 
+        Q.Sprite.extend("hCoin", {
+            init: function (p) {
+                this._super(p, { vx: -100, rangeX: 200, gravity: 0 });
+                this.add("2d");
+
+                this.p.initialX = this.p.x;
+
+                this.on("bump.left,bump.right,bump.bottom", function (collision) {
+                    if (collision.obj.isA("Player")) {
+                        this.destroy();
+                    }
+                })
+            },
+            step: function (dt) {
+                if (this.p.x - this.p.initialX >= this.p.rangeX && this.p.vx > 0)
+                    this.p.vx = -this.p.vx;
+                else if (-this.p.x + this.p.initialX >= this.p.rangeX && this.p.vx < 0)
+                    this.p.vx = -this.p.vx;
+            }
+        });
+
+        var LevelStage;
+
         Q.scene("level1",function(stage) {
           
             var background = new Q.TileLayer({ dataAsset: 'level1.tmx', layerIndex: 0, sheet: 'tiles', tileW: 70, tileH: 70, type: Q.SPRITE_NONE });
@@ -133,9 +160,11 @@
           
             var player = stage.insert(new Q.Player());
             
-            stage.insert(new Q.vCoin({x: 1050, y:350, rangeY:200, asset:"coin.png"}));
-            stage.add("viewport").follow(player,{x: true, y: true},{minX: 0, maxX: background.p.w, minY: 0, maxY: background.p.h});
-          
+            stage.insert(new Q.vCoin({ x: 1050, y: 350, rangeY: 200, asset: "coin.png" }));
+            stage.insert(new Q.hCoin({ x: 650, y: 350, rangeY: 200, asset: "coin.png" }));
+            stage.add("viewport").follow(player, { x: true, y: true }, { minX: 0, maxX: background.p.w, minY: 0, maxY: background.p.h });
+
+            LevelStage = stage;
         });
                 
         //load assets
