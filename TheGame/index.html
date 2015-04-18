@@ -14,13 +14,11 @@
     </head>
     <body style="background-color: black;">
         <script>
-        var Q = Quintus()
+
+        var Q = window.Q = Quintus()
             .include("Sprites, Scenes, Input, 2D, Anim, Touch, UI")
-            .setup({
-                width: 855,
-                height: 480,
-                development: true
-            }).controls().touch();            
+            .setup({ maximize: true })
+            .controls().touch();
         
         Q.scene("gameStats", function (stage) {
             var statsContainer = stage.insert(new Q.UI.Container({
@@ -56,123 +54,76 @@
             }
         });
 
-        Q.animations('player', {
-            run_left: { frames: [1, 2, 3], next: 'stand_left', rate: 1 / 5 },
-            run_right: { frames: [1, 2, 3], next: 'stand_right', rate: 1 / 5 },
-            stand_left: { frames: [0] },
-            stand_right: { frames: [0] },
-            jump: { frames: [2], loop: false, rate: 1 },
-        });
+        var SPRITE_BOX = 1;
+
+        Q.gravityY = 2000;
 
         Q.Sprite.extend("Player", {
             init: function (p) {
                 this._super(p, {
                     sheet: "player",        // Spritesheet
                     sprite: "player",       // Animationsheet
-                    x: 60,                 // Initial x position of player
-                    y: 90,                  // Initial y position of player
-                    jumpSpeed: -580,
+                    x: 40,
+                    y: 400,                
+                    jump: -850,
+                    speed: 500,
                     scale: 0.4,             // scale sprite to right size
                     flip: "",
-                    //standingPoints: [[-6, 20], [-13, 15], [-13, -28], [23, -28], [23, 15], [16, 20]],
-                    //duckingPoints: [[-16, 44], [-23, 35], [-23, -10], [23, -10], [23, 35], [16, 44]],
+                    collisionMask: SPRITE_BOX,
                 });
 
-                this.p.points = [[0, 0], [20, 0], [20, 20], [0, 20]]; //Giving player points of collision
+                //this.p.points = [[0, 0], [20, 0], [20, 20], [0, 20]]; //Giving player points of collision
 
-                this.add("2d, platformerControls, animation");  // Add components
-                this.on("hit.sprite", function (collision) {
-                    if (collision.obj.isA("Coin")) {
-                        collision.obj.destroy();
-                        this.p.coins++;
-                        //TODO: update the GUI
-
-                    }
-                });
+                this.add("2d, animation");  // Add components
             },
-
             step: function (dt) {
-                if (Q.inputs['up']) {
-                    this.play("jump", 1);
-                } else if (this.p.vx > 0) {
-                    this.p.flip = "";
-                    this.play("run_right");
-                } else if (this.p.vx < 0) {
-                    this.p.flip = "x";
-                    this.play("run_left");
+                this.p.vx += (this.p.speed - this.p.vx) / 4;
+
+                if (this.p.y > 595) {
+                    this.p.y = 595;
+                    this.p.landed = 1;
+                    this.p.vy = 0;
                 } else {
-                    this.play("stand_" + this.p.direction);
+                    this.p.landed = 0;
                 }
-            },            
 
-        });
-                       
-        Q.Sprite.extend("vCoin", {
-            init: function (p) {
-                this._super(p, { vy: -100, rangeY: 200, gravity: 0 });
-                this.add("2d");
+                if (Q.inputs['up'] && this.p.landed > 0) {
+                    this.p.vy = this.p.jump;
+                }
 
-                this.p.initialY = this.p.y;
+                if (this.p.landed) {
+                        this.play("walk_right");
+                } else {
+                    this.play("jump");
+                }
 
-                this.on("bump.left,bump.right,bump.bottom", function(collision){
-                    if (collision.obj.isA("Player")) {
-                        this.destroy();
-                    }
-                })
-            },
-            step: function (dt) {
-                if (this.p.y - this.p.initialY >= this.p.rangeY && this.p.vy > 0)
-                    this.p.vy = -this.p.vy;
-                else if (-this.p.y + this.p.initialY >= this.p.rangeY && this.p.vy < 0)
-                    this.p.vy = -this.p.vy;
+                this.stage.viewport.centerOn(this.p.x + 350, 400);
             }
+
         });
 
-        Q.Sprite.extend("hCoin", {
-            init: function (p) {
-                this._super(p, { vx: -100, rangeX: 200, gravity: 0 });
-                this.add("2d");
+        Q.scene("level1", function (stage) {
+            stage.insert(new Q.Repeater({ asset: "background-sky.png", speedX: 0.04 }));
+            stage.insert(new Q.Repeater({ asset: "background-mount.png", repeatY: false, speedX: 0.2, y: 190 }));
+            stage.insert(new Q.Repeater({ asset: "background-floor.png", repeatY: false, speedX: 0.4, y: 320, type: SPRITE_BOX }));
 
-                this.p.initialX = this.p.x;
+            //stage.insert(new Q.BoxThrower());
 
-                this.on("bump.left,bump.right,bump.bottom", function (collision) {
-                    if (collision.obj.isA("Player")) {
-                        this.destroy();
-                    }
-                })
-            },
-            step: function (dt) {
-                if (this.p.x - this.p.initialX >= this.p.rangeX && this.p.vx > 0)
-                    this.p.vx = -this.p.vx;
-                else if (-this.p.x + this.p.initialX >= this.p.rangeX && this.p.vx < 0)
-                    this.p.vx = -this.p.vx;
-            }
+            stage.insert(new Q.Player());
+            stage.add("viewport");//.follow(player, { x: true, y: true }, { minX: 0, maxX: background.p.w, minY: 0, maxY: background.p.h });
         });
 
-        var LevelStage;
-
-        Q.scene("level1",function(stage) {
-          
-            var background = new Q.TileLayer({ dataAsset: 'level1.tmx', layerIndex: 0, sheet: 'tiles', tileW: 70, tileH: 70, type: Q.SPRITE_NONE });
-            stage.insert(background);
-            
-            stage.collisionLayer(new Q.TileLayer({ dataAsset: 'level1.tmx', layerIndex:1,  sheet: 'tiles', tileW: 70, tileH: 70 }));
-          
-            var player = stage.insert(new Q.Player());
-            
-            stage.insert(new Q.vCoin({ x: 1050, y: 350, rangeY: 200, asset: "coin.png" }));
-            stage.insert(new Q.hCoin({ x: 650, y: 350, rangeY: 200, asset: "coin.png" }));
-            stage.add("viewport").follow(player, { x: true, y: true }, { minX: 0, maxX: background.p.w, minY: 0, maxY: background.p.h });
-
-            LevelStage = stage;
-        });
-                
-        //load assets
-        Q.load("tiles_map.png, player.png, level1.tmx, coin.png", function() {
-            Q.sheet("tiles", "tiles_map.png", { tilew: 70, tileh: 70 });
+        Q.load("player.png, background-sky.png, background-mount.png, background-floor.png, coin.png", function () {
             Q.sheet("player", "player.png", { "tilew": 130, "tileh": 230, "sx": 0, "sy": 0 });
+            Q.animations("player", {
+                walk_left: { frames: [0, 1, 2, 3], next: 'stand_left', rate: 1 / 5 },
+                walk_right: { frames: [0, 1, 2, 3], next: 'stand_right', rate: 1 / 5 },
+                stand_left: { frames: [0] },
+                stand_right: { frames: [0] },
+                jump: { frames: [2], loop: false, rate: 1 },
+            });
             Q.stageScene("level1");
-        });                    
+        });                 
         
         </script>
     </body>
