@@ -15,6 +15,7 @@
     <body style="background-color: black;">
         <script>
 
+        var pa = false;
         var Q = window.Q = Quintus()
             .include("Sprites, Scenes, Input, 2D, Anim, Touch, UI")
             .setup({ width: 950, height: 540 })
@@ -40,21 +41,25 @@
             stage.insert(new Q.UI.Button({ sheet: "bond", x: -16, scale: 1.2, y: 15, opacity: 0.7 }, function () { }), statsContainer);
             var bondTxt = stage.insert(new Q.UI.Text({ label: ": -", size: 18, color: "white", x: 42, y: 14, }), statsContainer);
         });
+
+        var displayEnd = function (gameOver) {
+            if (gameOver == 1) 
+                Q.stageScene("endGame", 3, { label: "Game Over" });
+            else
+                Q.stageScene("endGame", 3, { label: "Portfolio successfully created" });
+            pa = true;
+        };
         Q.scene("endGame", function (stage) {
-            //Q.stage().pause();
             var container = stage.insert(new Q.UI.Container({
                 x: Q.width / 2, y: Q.height / 2, fill: "rgba(0,0,0,0.5)",
             }));
             var button = container.insert(new Q.UI.Button({
-                x: 0, y:0, fill:"#CCCCCC", label: "Play again",
-            }));
+                x: 0, y: 0, fill: "#CCCCCC", label: "stay tuned :)",
+            },
+                function () { console.log('yet to impliment') }));
             var label = container.insert(new Q.UI.Text({
                 x: 0, y: -10 - button.p.h, fill: "#CCCCCC", label: stage.options.label,
-            }));
-            button.on("click", function () {
-                Q.clearStages();
-                Q.stageScene("level1");
-            });
+                }));
             container.fit(20);
         });
 
@@ -83,6 +88,7 @@
                 this.add("2d, animation");  // Add components
             },
             step: function (dt) {
+                if(pa) return;
                 this.p.vx += (this.p.speed - this.p.vx) / 4;
 
                 if (this.p.y > 555) {
@@ -122,16 +128,12 @@
             damage: function () {
                 if (!this.p.timeInvincible) {
                     this.p.opacity = 0.5;
-                    this.p.life -= 10;
+                    this.p.life -= 25;
                     this.p.timeInvincible = 1;
-                    if (this.p.life < 100) {
-                        this.destroy();
-                        Q.stageScene("endGame", 10, { label: "Game Over" });
-                    }
-                    else {
-                        var lifeLabel = Q("UI.Text", 1).first();
-                        lifeLabel.p.label = "Life : " + this.p.life + "%";
-                    }
+                    var lifeLabel = Q("UI.Text", 1).first();
+                    lifeLabel.p.label = "Life : " + this.p.life + "%";
+                    if (this.p.life < 5)
+                        displayEnd(1);
                 }
             },
         });
@@ -144,7 +146,7 @@
                 this._super({
                     x: player.p.x + Q.width + 50,
                     y: levels[Math.floor(Math.random() * 5)],
-                    frame: Math.random() < 0.5 ? 1 : 0,
+                    frame: 0,
                     scale: 1.5,
                     type: SPRITE_BOX,
                     sheet: "coin",        // Spritesheet
@@ -171,10 +173,17 @@
                 if (this.p.y > 800) { this.destroy(); }
             },
             hit: function (collision) {
+                this.p.type = 0;
+                this.p.collisionMask = Q.SPRITE_NONE;
+                this.p.vx = 200;
+                this.p.ay = 400;
+                this.p.vy = -300;
+                this.p.opacity = 0.5;
+
                 if (!this.p.hasHit)
                     collision.obj.addCoin();
                 this.p.hasHit = true;
-                this.destroy();
+                //this.destroy();
             }
         });
 
@@ -186,7 +195,7 @@
                 this._super({
                     x: player.p.x + Q.width + 50,
                     y: levels[Math.floor(Math.random() * 4)],
-                    frame: Math.random() < 0.5 ? 1 : 0,
+                    frame: 0,
                     scale: 1.2,
                     type: SPRITE_BOX,
                     sheet: "loan",        // Spritesheet
@@ -204,19 +213,27 @@
 
                 this.p.vy += this.p.ay * dt;
                 this.p.y += this.p.vy * dt;
-                if (this.p.y != 585 || this.p.y != 460) {
+                if (this.p.y != 585 && this.p.y != 460) {
                     this.p.angle += this.p.theta * dt;
                 }
 
                 if (this.p.y > 800) { this.destroy(); }
             },
             hit: function (collision) {
-                collision.obj.p.loan++;
-                var lifeLabel = Q("UI.Text", 2).first();
-                lifeLabel.p.label = " : " + collision.obj.p.loan;
-                this.destroy();
-                if(collision.obj.p.loan + collision.obj.p.bond > 20)
-                    Q.stageScene("endGame", 10, { label: "Portfolio created, stay tuned for next stage :)" });
+                this.p.type = 0;
+                this.p.collisionMask = Q.SPRITE_NONE;
+                this.p.vx = 200;
+                this.p.ay = 400;
+                this.p.vy = -300;
+                this.p.opacity = 0.5;
+                if (!this.p.hasHit) {
+                    collision.obj.p.loan++;
+                    var lifeLabel = Q("UI.Text", 2).first();
+                    lifeLabel.p.label = " : " + collision.obj.p.loan;
+                    if (collision.obj.p.loan + collision.obj.p.bond >= 20)
+                        displayEnd(0);
+                }
+                this.p.hasHit = true;
             }
         });
 
@@ -228,7 +245,7 @@
                 this._super({
                     x: player.p.x + Q.width + 50,
                     y: levels[Math.floor(Math.random() * 4)],
-                    frame: Math.random() < 0.5 ? 1 : 0,
+                    frame: 0,
                     scale: 1.2,
                     type: SPRITE_BOX,
                     sheet: "bond",        // Spritesheet
@@ -246,31 +263,38 @@
 
                 this.p.vy += this.p.ay * dt;
                 this.p.y += this.p.vy * dt;
-                if (this.p.y != 585 || this.p.y != 460) {
+                if (this.p.y != 585 && this.p.y != 460) {
                     this.p.angle += this.p.theta * dt;
                 }
 
                 if (this.p.y > 800) { this.destroy(); }
             },
             hit: function (collision) {
-                collision.obj.p.bond++;
-                var lifeLabel = Q("UI.Text", 2).items[1];
-                lifeLabel.p.label = " : " + collision.obj.p.bond;
-                this.destroy();
-                if (collision.obj.p.loan + collision.obj.p.bond > 20)
-                    Q.stageScene("endGame", 10, { label: "Portfolio created, stay tuned for next stage :)" });
+                this.p.type = 0;
+                this.p.collisionMask = Q.SPRITE_NONE;
+                this.p.vx = 200;
+                this.p.ay = 400;
+                this.p.vy = -300;
+                this.p.opacity = 0.5;
+                if (!this.p.hasHit) {
+                    collision.obj.p.bond++;
+                    var lifeLabel = Q("UI.Text", 2).items[1];
+                    lifeLabel.p.label = " : " + collision.obj.p.bond;
+                    if (collision.obj.p.loan + collision.obj.p.bond > 20)
+                        displayEnd(0);
+                }
+                this.p.hasHit = true;
             }
         });
 
         Q.Sprite.extend("Stock", {
             init: function () {
                 var levels = [585, 520, 460, 400];
-
                 var player = Q("Player").first();
                 this._super({
                     x: player.p.x + Q.width + 50,
                     y: levels[Math.floor(Math.random() * 4)],
-                    frame: Math.random() < 0.5 ? 1 : 0,
+                    //frame: 1,//Math.random() < 0.5 ? 1 : 0,
                     scale: 1.2,
                     type: SPRITE_BOX,
                     sheet: "stock",        // Spritesheet
