@@ -18,7 +18,7 @@
         var pa = false;
         var Q = window.Q = Quintus()
             .include("Sprites, Scenes, Input, 2D, Anim, Touch, UI")
-            .setup({ width: 950, height: 540 })
+            .setup({ width: 1200, height: 840 })
             .controls().touch();
         
         Q.scene("gameStats", function (stage) {
@@ -50,6 +50,7 @@
             pa = true;
         };
         Q.scene("endGame", function (stage) {
+            Q.pauseGame();
             var container = stage.insert(new Q.UI.Container({
                 x: Q.width / 2, y: Q.height / 2, fill: "rgba(0,0,0,0.5)",
             }));
@@ -183,7 +184,7 @@
                 if (!this.p.hasHit)
                     collision.obj.addCoin();
                 this.p.hasHit = true;
-                //this.destroy();
+                this.destroy();
             }
         });
 
@@ -234,6 +235,7 @@
                         displayEnd(0);
                 }
                 this.p.hasHit = true;
+                this.destroy();
             }
         });
 
@@ -284,6 +286,7 @@
                         displayEnd(0);
                 }
                 this.p.hasHit = true;
+                this.destroy();
             }
         });
 
