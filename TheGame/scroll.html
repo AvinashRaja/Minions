@@ -63,7 +63,7 @@
        	
        	<header class="entry-header">
         	<div class="inner">		
-				<h1 class="entry-title" style="font-family:cursive;">The Game</h1>
+				<h1 class="entry-title" style="font-family:cursive;">SocGen Surfer</h1>
 			</div>
 		</header>
        	
@@ -78,12 +78,9 @@
                     </div>
 		    		<div class="copy-container">
 			    		<h2>Vision</h2>
-<pre><code>  Students - Marketing
-  Employees - Productivity
-  Investors - Revenue
-
- Scroll Down..
-</code></pre>
+<p>To convert <strong>Game</strong> as learning tool, and teach everyone most complex domain in the most simpliest way possible.
+     <strong><br /><br />Keep scrolling..</strong>
+</p>
 		    		</div>
 		    		<!--img src="img/img_hero-iphone.jpg" alt="iPhone" /-->
 	        	</div>
@@ -106,12 +103,12 @@
 		    	<div class="section-content" style="background-color:rgb(236, 218, 180)">
 		    		<div class="copy-container" style="margin-left: -520px; margin-top: -160px; width: 145px;">
                         <p>Use <strong>Up</strong> arrow and <strong>Down</strong> arrow and collect only FIC products.</p>
-                        <code onclick="playBtn()" style="cursor:pointer;">Play</code>
+                        <code id="playbt" onclick="playBtn()" style="cursor:pointer;">Play / Pause</code>
 		    		</div>
-		    		<div class="images-container">
-		    			<img class="blue" src="img/img_iphone.png" alt="" style="margin-top: -182px; margin-left: 310px;" />
+		    		<div class="">
+		    			<img class="blue" src="img/img_iphone.png" alt="" style="margin-top: -95px; margin-left: 335px;" />
 		    		</div>
-                    <canvas id="gameCanvas" width="670" height="404" style="margin-top: 150px; margin-left: 130px; border:0px solid red; z-index: 1;" /> 
+                    <canvas id="gameCanvas" width="670" height="404" tabindex="1" style="margin-top: -250px; margin-left: 130px; border:0px solid red; z-index: 1;" /> 
 	        	</div>
 		    </section>
 		    <section id="betweenSlidesAnimEnd">
@@ -137,14 +134,17 @@
 		<script type="text/javascript" src="js/onepagescroll/jquery.onepage-scroll.js"></script>
 		<link href='js/onepagescroll/onepage-scroll.css' rel='stylesheet' type='text/css'>
         <script src="js/main.js"></script>
+        <script src="js/game.js"></script>
+        <script>           
+            var isPause = false;
+            var gameOver = true;
 
-        <script>
-            var pa = false;
-            var Q = window.Q = Quintus()
+            var Q = Quintus()
                 .include("Sprites, Scenes, Input, 2D, Anim, Touch, UI")
                 .setup("gameCanvas") //{ width: 950, height: 540 })
                 .controls().touch();
 
+            window.Q = Q;
             Q.scene("gameStats", function (stage) {
                 var statsContainer = stage.insert(new Q.UI.Container({
                     fill: "gray", x: 670 / 2, y: 40, border: 1, shadow: 3, shadowColor: "rgba(0,0,0,0.5)", w: 960, h: 40, opacity: 0.2,
@@ -174,8 +174,8 @@
                 if (gameOver == 1)
                     Q.stageScene("endGame", 3, { label: "Game Over" });
                 else
-                    Q.stageScene("endGame", 3, { label: "Portfolio successfully created" });
-                pa = true;
+                    Q.stageScene("endGame", 3, { label: "Portfolio created, next collect Market data and Static data" });
+                gameOver = true;
             };
             Q.scene("endGame", function (stage) {
                 var container = stage.insert(new Q.UI.Container({
@@ -216,7 +216,7 @@
                     this.add("2d, animation");  // Add components
                 },
                 step: function (dt) {
-                    if (pa) return;
+                    if (gameOver) return;
                     this.p.vx += (this.p.speed - this.p.vx) / 4;
 
                     if (this.p.y > 505) {
@@ -260,7 +260,7 @@
                         this.p.timeInvincible = 1;
                         var lifeLabel = Q("UI.Text", 1).first();
                         lifeLabel.p.label = "Life : " + this.p.life + "%";
-                        if (this.p.life == 5)
+                        if (this.p.life < 5)
                             displayEnd(1);
                     }
                 },
@@ -506,22 +506,37 @@
                 Q.animations("coin", {
                     rotate: { frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], rate: 1 / 5 },
                 });
-                Q.stageScene("level1");
-                Q.stageScene("gameStats", 1);
-                Q.stageScene("stageStats", 2);
+
+                Q.stageScene("dummy");
             });
 
-            Q.pauseGame();
+            Q.scene("dummy", function (stage) {
+                stage.insert(new Q.Repeater({ asset: "background-sky.png", speedX: 0.04 }));
+                stage.insert(new Q.Repeater({ asset: "background-mount.png", repeatY: false, speedX: 0.2, y: 170 }));
+                stage.insert(new Q.Repeater({ asset: "background-floor.png", repeatY: false, speedX: 0.4, y: 275, type: SPRITE_BOX }));
 
+                stage.add("viewport");
+            });
+            
             var playBtn = function () {
-                if (pa == true) {
+                document.getElementById('gameCanvas').focus();
+                if (gameOver == true) {
+                    gameOver = false;
                     Q.clearStages();
                     Q.stageScene("level1");
                     Q.stageScene("gameStats", 1);
                     Q.stageScene("stageStats", 2);
                 }
-                else
-                    Q.unpauseGame();
+                else {
+                    if (isPause) {
+                        isPause = false;
+                        Q.unpauseGame();
+                    }
+                    else {
+                        isPause = true;
+                        Q.pauseGame();
+                    }
+                }
             };
 
         </script>
