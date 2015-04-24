@@ -18,22 +18,22 @@
         var pa = false;
         var Q = window.Q = Quintus()
             .include("Sprites, Scenes, Input, 2D, Anim, Touch, UI")
-            .setup({ width: 1200, height: 840 })
+            .setup({  width:670, height:404 })
             .controls().touch();
         
         Q.scene("gameStats", function (stage) {
             var statsContainer = stage.insert(new Q.UI.Container({
-                fill: "gray", x: 950 / 2, y: 40, border: 1, shadow: 3, shadowColor: "rgba(0,0,0,0.5)", w: 960, h: 40, opacity: 0.2, }));
+                fill: "gray", x: 670 / 2, y: 40, border: 1, shadow: 3, shadowColor: "rgba(0,0,0,0.5)", w: 960, h: 40, opacity: 0.2, }));
 
             var lives = stage.insert(new Q.UI.Text({
-                label: "Life : 100%", color: "white", x: -300, y: 0 }), statsContainer);
+                label: "Life : 100%", color: "white", x: -200, y: 0 }), statsContainer);
 
             var coins = stage.insert(new Q.UI.Text({
-                label: "Coins : 0", color: "white", x: 300, y: 0 }), statsContainer);
+                label: "Coins : 0", color: "white", x: 200, y: 0 }), statsContainer);
         });
         Q.scene("stageStats", function (stage) {
             var statsContainer = stage.insert(new Q.UI.Container({
-                fill: "gray", x: 85, y: 115, border: 1, shadow: 2, shadowColor: "rgba(0,0,0,0.5)", w: 140, h: 80, opacity: 0.2, }));
+                fill: "gray", x: 580, y: 115, border: 1, shadow: 2, shadowColor: "rgba(0,0,0,0.5)", w: 140, h: 80, opacity: 0.2, }));
 
             stage.insert(new Q.UI.Button({sheet: "loan", x: -15, scale: 1.2, y: -15, opacity: 0.7 }, function () { }), statsContainer);
             var loanTxt = stage.insert(new Q.UI.Text({ label: ": -", size: 18, color: "white", x: 42, y: -16, }), statsContainer);
@@ -85,15 +85,27 @@
                     bond: 0,
                 });
 
+                this.on("left", "Pause");
+                this.on("right", "UnPause");
                 //this.p.points = [[0, 0], [20, 0], [20, 20], [0, 20]]; //Giving player points of collision
                 this.add("2d, animation");  // Add components
             },
+            Pause:function(dt)
+            {
+                //Dispaly that the game is paused
+                Q.pauseGame();
+            },
+            UnPause: function (dt) {
+                //Dispaly that the game is paused
+                Q.unpauseGame();
+            },
+
             step: function (dt) {
                 if(pa) return;
                 this.p.vx += (this.p.speed - this.p.vx) / 4;
 
-                if (this.p.y > 555) {
-                    this.p.y = 555;
+                if (this.p.y > 505) {
+                    this.p.y = 505;
                     this.p.landed = 1;
                     this.p.vy = 0;
                 } else {
@@ -119,7 +131,7 @@
                     this.p.opacity = 1;
                 }
 
-                this.stage.viewport.centerOn(this.p.x + 350, 400);
+                this.stage.viewport.centerOn(this.p.x + 250, 400);
             },
             addCoin: function () {
                 this.p.coins++;
@@ -139,9 +151,10 @@
             },
         });
 
+        var levels = [535, 470, 410, 350, 300];
+
         Q.Sprite.extend("Coin", {
             init: function () {
-                var levels = [585, 520, 460, 400, 350];
 
                 var player = Q("Player").first();
                 this._super({
@@ -167,7 +180,7 @@
 
                 this.p.vy += this.p.ay * dt;
                 this.p.y += this.p.vy * dt;
-                if (this.p.y != 585) {
+                if (this.p.y != 535) {
                     this.p.angle += this.p.theta * dt;
                 }
 
@@ -190,7 +203,6 @@
 
         Q.Sprite.extend("Loan", {
             init: function () {
-                var levels = [585, 520, 460, 400];
 
                 var player = Q("Player").first();
                 this._super({
@@ -214,7 +226,7 @@
 
                 this.p.vy += this.p.ay * dt;
                 this.p.y += this.p.vy * dt;
-                if (this.p.y != 585 && this.p.y != 460) {
+                if (this.p.y != 535 && this.p.y != 460) {
                     this.p.angle += this.p.theta * dt;
                 }
 
@@ -241,7 +253,6 @@
 
         Q.Sprite.extend("Bond", {
             init: function () {
-                var levels = [585, 520, 460, 400];
 
                 var player = Q("Player").first();
                 this._super({
@@ -292,7 +303,6 @@
 
         Q.Sprite.extend("Stock", {
             init: function () {
-                var levels = [585, 520, 460, 400];
                 var player = Q("Player").first();
                 this._super({
                     x: player.p.x + Q.width + 50,
@@ -355,7 +365,7 @@
         Q.scene("level1", function (stage) {
             stage.insert(new Q.Repeater({ asset: "background-sky.png", speedX: 0.04 }));
             stage.insert(new Q.Repeater({ asset: "background-mount.png", repeatY: false, speedX: 0.2, y: 170 }));
-            stage.insert(new Q.Repeater({ asset: "background-floor.png", repeatY: false, speedX: 0.4, y: 300, type: SPRITE_BOX }));
+            stage.insert(new Q.Repeater({ asset: "background-floor.png", repeatY: false, speedX: 0.4, y: 275, type: SPRITE_BOX }));
 
             stage.insert(new Q.Thrower());
 
