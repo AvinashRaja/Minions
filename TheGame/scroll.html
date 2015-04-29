@@ -170,8 +170,8 @@
                 var bondTxt = stage.insert(new Q.UI.Text({ label: ": -", size: 18, color: "white", x: 42, y: 14, }), statsContainer);
             });
 
-            var displayEnd = function (gameOver) {
-                if (gameOver == 1)
+            var displayEnd = function (isGameOver) {
+                if (isGameOver == 1)
                     Q.stageScene("endGame", 3, { label: "Game Over" });
                 else
                     Q.stageScene("endGame", 3, { label: "Portfolio created, next collect Market data and Static data" });
