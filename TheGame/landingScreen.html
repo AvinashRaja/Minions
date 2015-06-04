@@ -8,25 +8,74 @@
             width: 100%;
             height: 100%;
         }
+        #playBtn {
+            width: 500px;
+            height: 100px;
+            background-color: blue;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        #startBtn {
+            width: 500px;
+            height: 100px;
+            background-color: red;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+        .container {
+            width: 670px;
+            position: relative;
+            left: 100px;
+            height: 404px;
+            background-image: url('images/bg-1st-screen.jpg');
+        }
     </style>
     <script src="js/vendor/jquery-1.9.1.min.js"></script>
+    <script src="js/jquery-ui-1.11.4.custom/jquery-ui.min.js"></script>
 </head>
 <body>
-    <div id="bgImage" style="width:670px; height:404px; background-image:url('images/bg-1st-screen.jpg')">
-         <div style="top:10px; left:10px">PLAY</div>
+    <div class="container">
+        <div id="playBtn" style="top:10px; left:10px;">PLAY</div>
+        <div id="startBtn" style="top:10px; left:10px;">SocGen Surfers</div>
+        <div class="clear"></div>
     </div>
     <script type="text/javascript">
         var h = -300;
         var k = -250;
-        var r = 100;
+        var r = 70;
         var theta = 0;
         
         setInterval(function () {
             theta += 0.003;
             var x = h + r * Math.cos(theta);
             var y = k - 0.5 * r * Math.sin(theta);
-            $("#bgImage").css("backgroundPosition", x + "px " + y + "px" );
+            $(".container").css("backgroundPosition", x + "px " + y + "px" );
         }, 10);
+
+        var $div1 = $('#playBtn'),
+            $div2 = $('#startBtn'),
+            currentDiv = 'play';
+
+        $div2.hide();
+
+        $("#playBtn").click(function () {
+            $div1.toggle('slide', { direction: 'right' }, 'slow');
+            $div2.toggle('slide', { direction: 'left' }, 'slow');
+        });
+
+        $("#startBtn").click(function () {
+            $div1.toggle('slide', { direction: 'right' }, 'slow');
+            $div2.toggle('slide', { direction: 'left' }, 'slow');
+        });
+
     </script>
 </body>
 </html>
