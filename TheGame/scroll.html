@@ -191,11 +191,13 @@
             var r = 70;
             var theta = 0;
 
-            setInterval(function () {
-                theta += 0.003;
-                var x = h + r * Math.cos(theta);
-                var y = k - 0.5 * r * Math.sin(theta);
-                $(".container").css("backgroundPosition", x + "px " + y + "px");
+            var floatingBg = setInterval(function () {
+                if (isPause || gameOver) {
+                    theta += 0.003;
+                    var x = h + r * Math.cos(theta);
+                    var y = k - 0.5 * r * Math.sin(theta);
+                    $(".container").css("backgroundPosition", x + "px " + y + "px");
+                }
             }, 10);
 
             var $play = $('#playBtn'),
@@ -217,8 +219,17 @@
                 playBtn();
             });
 
-            //$game.click(function () {
-            //});
+            $game.keyup(function (e) {
+                if (e.keyCode == 8) { // user has pressed backspace 
+                    if (gameOver != true && isPause != true)
+                        playBtn();
+                    $start.toggle('slide', { direction: 'left' }, 'slow');
+                    $game.toggle('slide', { direction: 'right' }, 'slow');
+                }
+                if (e.keyCode == 32) { // user has pressed space
+                    playBtn();
+                }
+            });
 
         </script>
 
