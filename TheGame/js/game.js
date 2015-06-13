@@ -342,7 +342,7 @@ Q.GameObject.extend("Thrower", {
     render: function () { }
 });
 
-Q.scene("level1", function (stage) {
+Q.scene("gameScene", function (stage) {
     stage.insert(new Q.Repeater({ asset: "background-sky.png", speedX: 0.04 }));
     stage.insert(new Q.Repeater({ asset: "background-mount.png", repeatY: false, speedX: 0.2, y: 170 }));
     stage.insert(new Q.Repeater({ asset: "background-floor.png", repeatY: false, speedX: 0.4, y: 275, type: SPRITE_BOX }));
