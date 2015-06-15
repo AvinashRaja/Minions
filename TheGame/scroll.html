@@ -172,7 +172,7 @@
                             </svg>
                             <div class='content1' id="playBtnTxt">
                                 <div class='visible'>
-                                    <p>Click & </p>
+                                    <p></p>
                                     <ul>
                                         <li>Play</li>
                                         <li>Explore</li>
@@ -189,10 +189,17 @@
                                 <div id="wLevel2" style="width: 93px; height: 71px; left: -156px; position: relative; top: 74px; float: left;"></div>
                             </div>
                         </div>
-                        <!--div id="story" style="z-index: 2; width: 100%; height: 100%;">
-                            <div id="sMinion" style="background: url('img/mini.png');"></div>
-                            <div id="sRisk"></div>
-                        </div-->
+                        <div id="story" style="z-index: 2; width: 100%; height: 100%;">
+                            <div id="sMinion" style="background: url('img/mini.png') no-repeat; top: 70px; position: relative;"></div>
+                            <div id="sRisk" style="width: 1px; height: 375px; background: url('img/callout.png') no-repeat; position: relative; top: -371px; left: 250px; -webkit-transform: rotate(54deg); -moz-transform: rotate(54deg); -ms-transform: rotate(54deg); -o-transform: rotate(54deg); transform: rotate(54deg);"></div>
+                            <div id="instr" style="opacity: 0; font-size: 20px; top: -696px; position: relative; left: 310px; float: left; width: 259px; height: 247px;">
+                                <pre style="background:none; font-size: 20px;">Hello everyone...
+Can u plz collect 
+fixed income products 
+for me..
+[HINT : Loan and Bond are FIC products, NOT STOCK]</pre>
+                            </div>
+                        </div>
                         <canvas id="gameCanvas" width="670" height="404" tabindex="1" style="z-index: 1;" />
                         <div class="clear"></div>
                     </div>
@@ -252,14 +259,22 @@
                 theta += 0.003;
                 var x = h + r * Math.cos(theta);
                 var y = k - 0.5 * r * Math.sin(theta);
-                //$(".container").css("backgroundPosition", x + "px " + y + "px");
+                $(".container").css("backgroundPosition", x + "px " + y + "px");
             }
         }, 10);
 
         var playStory = function () {
-            var x = 0;
-            while (x < 100000000)
-                x++;
+            $('#sRisk').animate({
+                top: '-371px',
+                left: '250px',
+                opacity: '0.6',
+                height: '375px',
+                width: '375px'
+            }, 500, function () {
+                $('#instr').animate({
+                    opacity: '1'
+                }, 1000);
+            });
         }
 
         var $play = $('#playBtn'),
@@ -279,11 +294,14 @@
 
         $('#wLevel1').click(function () {
             $start.toggle('slide', { direction: 'left' }, 'slow');
-            $story.toggle('slide', { direction: 'right' }, 'slow');
-            playStory();
-            $story.hide();
-            $game.show();
-            playBtn();
+            $story.toggle('slide', { direction: 'left' }, 'slow', playStory);
+        });
+
+        $story.click(function () {
+            $story.toggle('slide', { direction: 'left' }, 'fast',
+                function () {
+                    $game.toggle('slide', { direction: 'right' }, 'slow', playBtn);
+                })
         });
 
         $('#wLevel2').click(function () {
