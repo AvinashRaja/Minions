@@ -197,13 +197,18 @@
 Can u plz collect 
 fixed income products 
 for me..
-[HINT : Loan and Bond are FIC products, NOT STOCK]</pre>
+[HINT : Loan and Bond are FIC products, NOT STOCK]
+
+        << OK >></pre>
                             </div>
                         </div>
                         <canvas id="gameCanvas" width="670" height="404" tabindex="1" style="z-index: 1;" />
                         <div class="clear"></div>
                     </div>
                 </div>
+                <!--<div class="images-container">
+                    <img class="front2" src="img/img_iphone_front_2.png" alt="Team" title="Team Navikaran" style="margin-left: -300px; margin-top: 80px" />
+                </div>-->
             </div>
         </section>
         <section id="betweenSlidesAnimEnd">
@@ -300,8 +305,9 @@ for me..
         $story.click(function () {
             $story.toggle('slide', { direction: 'left' }, 'fast',
                 function () {
-                    $game.toggle('slide', { direction: 'right' }, 'slow', playBtn);
-                })
+                    $game.toggle('slide', { direction: 'right' }, 'slow');
+                });
+            playBtn();
         });
 
         $('#wLevel2').click(function () {
