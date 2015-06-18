@@ -206,9 +206,7 @@ for me..
                         <div class="clear"></div>
                     </div>
                 </div>
-                <!--<div class="images-container">
-                    <img class="front2" src="img/img_iphone_front_2.png" alt="Team" title="Team Navikaran" style="margin-left: -300px; margin-top: 80px" />
-                </div>-->
+                <img class="front2" id="minionImg" src="images/minions-2015-im-with-stupid-4.png" alt="Play" title="Yeah.. Minions :-/" style=" left: 870px; top: -230px; position: relative; height: 230px;" />
             </div>
         </section>
         <section id="betweenSlidesAnimEnd">
@@ -259,13 +257,27 @@ for me..
         var r = 70;
         var theta = 0;
 
+        $("#minionImg").click(function () {
+            playBtn();
+        });
+
+        var c = 0;
         var floatingBg = setInterval(function () {
             if (isPause || gameOver) {
                 theta += 0.003;
                 var x = h + r * Math.cos(theta);
                 var y = k - 0.5 * r * Math.sin(theta);
                 $(".container").css("backgroundPosition", x + "px " + y + "px");
-            }
+
+                // Minion @ bottom
+                if (c == 500) {
+                    $("#minionImg").attr('src', 'images/minions-2015-im-with-stupid-4.png');
+                    c = 0;
+                } if (c == 250) {
+                    $("#minionImg").attr('src', 'images/minions-2015-im-with-stupid-5.png');
+                }
+                c += 10;
+            }            
         }, 10);
 
         var playStory = function () {
